@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Historical Fide rating charts of top players</title>
+
+<!-- shiny includes -->
+
+
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>  <script type="application/shiny-singletons"></script>  <script type="application/html-dependencies">json2[2014.02.04];jquery[1.11.3];shiny[0.13.0];htmlwidgets[0.5];plotlyjs[1.2.1];plotly-binding[2.0.16];bootstrap[3.3.5]</script><script src="shared/json2-min.js"></script>
+<script src="shared/jquery.min.js"></script>
+<link href="shared/shiny.css" rel="stylesheet" />
+<script src="shared/shiny.min.js"></script>
+<script src="htmlwidgets-0.5/htmlwidgets.js"></script>
+<script src="plotlyjs-1.2.1/plotly-latest.min.js"></script>
+<script src="plotly-binding-2.0.16/plotly.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="shared/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+<script src="shared/bootstrap/js/bootstrap.min.js"></script>
+<script src="shared/bootstrap/shim/html5shiv.min.js"></script>
+<script src="shared/bootstrap/shim/respond.min.js"></script>  
+
+
+<!-- end shiny includes -->
+
+<!-- includes -->
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="//d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<link rel="stylesheet" type="text/css" href="//cdn.datatables.net/1.10.10/css/jquery.dataTables.css">
+<script type="text/javascript" charset="utf8" src="//cdn.datatables.net/1.10.10/js/jquery.dataTables.js"></script>
+<!-- end includes -->
+
+</head>
+
+<body>
+
+<script>
+
+var cval=0;
+// handlers
+function setInnerHTML(message)
+{
+	document.getElementById(message[0]).innerHTML=message[1];
+}
+function setTable(message)
+{
+	document.getElementById(message[0]).innerHTML=message[1];
+	$('#'+message[2]).DataTable();
+}
+function setPlot(message)
+{
+	TESTER = document.getElementById('tester');
+	Plotly.plot( TESTER, JSON.parse(message[0]), JSON.parse(message[1]) );	
+}
+// end handlers
+
+// startup
+$(document).ready(function(){
+	// bind handlers
+	Shiny.addCustomMessageHandler("setTable",setTable);
+	Shiny.addCustomMessageHandler("setPlot",setPlot);
+	Shiny.addCustomMessageHandler("setInnerHTML",setInnerHTML);
+	// end bind handlers
+
+	d3.select("body").style("background-color", "#ffffff");
+	d3.select("body").transition().duration(1000).delay(1000).style("background-color", "#dfdfdf");
+
+});
+// end startup
+
+</script>
+
+<div id="mytablecont"></div>
+<div id="tester" style="width:600px;height:250px;"></div>
+<div id="svgcont"></div>
+<div onmousedown="cval=cval+1;Shiny.onInputChange('control',cval);">control</div>
+
+</body>
+
+</html>

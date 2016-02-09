@@ -1,0 +1,9 @@
+
+
+/rsconnect
+
+*.RData
+.RHistory
+
+*.bat
+
