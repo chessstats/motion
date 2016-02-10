@@ -30,7 +30,7 @@ shinyServer(function(input, output, session){
         eval(parse(text=command))
       }
       
-      p<-layout(p)
+      p<-layout(p,height=600,width=800)
       
       p
     })
