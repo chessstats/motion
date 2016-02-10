@@ -27,6 +27,10 @@ shinyServer(function(input, output, session){
     p
   })
   
+  observeEvent(input$rplayers,{
+    session$sendCustomMessage(type="setPlayers",message=players)
+  })
+  
   observeEvent(input$control,{
     tablestr="<table id='mytable' class='display'><thead><tr><th>head</th></tr></thead><tbody><tr><td>body</td></tr></tbody>"
     session$sendCustomMessage(type="setTable",message=list("tablecont",tablestr,"mytable"))

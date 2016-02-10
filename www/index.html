@@ -64,7 +64,29 @@ function setPlot(message)
 {
 	Plotly.newPlot(document.getElementById(message[0]),JSON.parse(message[1]),JSON.parse(message[2]));	
 }
+var players;
+function setPlayers(message)
+{
+	players=message;
+	var buff="";
+	for(i=0;i<players.length;i++)
+	{
+		buff+=(players[i]+"<br>");
+	}
+	$(".playerselect").html(buff);
+}
 // end handlers
+
+// build letter menu
+function buildLetterMenu()
+{
+	var buff="Players:";
+	for(i="A".charCodeAt(0);i<"Z".charCodeAt(0);i++)
+	{
+		buff+='<button>'+String.fromCharCode(i)+'</button>'
+	}
+	$('.menu').html(buff);
+}
 
 // startup
 $(document).ready(function(){
@@ -72,10 +94,22 @@ $(document).ready(function(){
 	Shiny.addCustomMessageHandler("setTable",setTable);
 	Shiny.addCustomMessageHandler("setPlot",setPlot);
 	Shiny.addCustomMessageHandler("setInnerHTML",setInnerHTML);
+	Shiny.addCustomMessageHandler("setPlayers",setPlayers);
 	// end bind handlers
 
 	d3.select("body").style("background-color", "#ffffff");
 	d3.select("body").transition().duration(1000).delay(1000).style("background-color", "#dfdfdf");
+
+	buildLetterMenu();
+
+	$(function() {
+  	setTimeout(function() {
+    	Shiny.onInputChange('rplayers',1);
+  	}, 100)
+});
+
+
+	
 
 });
 // end startup
@@ -83,10 +117,13 @@ $(document).ready(function(){
 </script>
 
 <div class="parent">
-  <div class="a">
-	<button onmousedown="cval=cval+1;Shiny.onInputChange('control',cval);">Control</button>
+  <div class="menu">
+	<button id="cbutton" onmousedown="cval=cval+1;Shiny.onInputChange('rplayers',cval);">Control</button>
   </div>
-  <div class="b">
+  <div class="playerselect">
+  select player
+  </div>
+  <div class="content">
   	<div id="dataTable" style="width:100%; height:auto" class="datatables html-widget html-widget-output"></div>
     <div id="trendPlot" style="width:100%; height:auto" class="plotly html-widget html-widget-output"></div>
   	<div id="tablecont"></div>
