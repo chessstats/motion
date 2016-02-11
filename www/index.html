@@ -85,16 +85,31 @@ function pchcont(sel){
 	return '<img class="selicon" src="unselected.png">'
 }
 
-function handlePlayerCheckbox(i){
-	selplayers[i]=!selplayers[i];
-	$('#pch'+i.toString()).html(pchcont(selplayers[i]))
+function collectSelectedIndices(){
 	var selpis=new Array(0);
 	for(j=0;j<numplayers;j++) {
 		if(selplayers[j]) {
 			selpis.push(players[j]);
 		}
 	}
-	cval=cval+1;Shiny.onInputChange('control',selpis);
+	return(selpis);
+}
+
+function requestChartData(){
+	Shiny.onInputChange('control',collectSelectedIndices());
+}
+
+var startyear=2001;
+var chartsize=800;
+
+function redrawChart(){
+	Shiny.onInputChange('reqchart',[chartsize,startyear]);
+}
+
+function handlePlayerCheckbox(i){
+	selplayers[i]=!selplayers[i];
+	$('#pch'+i.toString()).html(pchcont(selplayers[i]))
+	requestChartData();
 }
 
 function clearSelect(){
@@ -102,38 +117,71 @@ function clearSelect(){
 	lastletter="-";
 }
 
+function clearAllSelections(){
+	for(i=0;i<numplayers;i++){
+		selplayers[i]=false;
+	}
+	clearSelect();
+	requestChartData();
+}
+
+function setChartSize(sizestr,dodraw){
+	size=parseInt(sizestr);
+	$('.content').height(Math.floor(size/1.5)+5)
+	$('.content').width(size+5)
+	chartsize=size;
+	if(dodraw){
+		redrawChart();
+	}
+}
+
+function setStartYear(startyearstr){
+	startyear=parseInt(startyearstr);
+	redrawChart();
+}
+
 var letter="+"
 function selectLetterInner()
 {
 	var buff="";
-	var found=0
-	for(i=0;i<numplayers;i++)
-	{
-		var player=players[i]
-		var ok;
-		if(letter==0){
-			ok=selplayers[i]
-		}else{
-			ok=(player.charAt(0)==letter);
-		}
-		if(ok){
-			var checked=pchcont(false);
-			found++;
-			if(selplayers[i]){
-				checked=pchcont(true);
+	if(letter==1){
+		buff='<div class="setting">Chart size:<input type="range" min="400" max="1200" step="50" value="'+chartsize.toString()+'" onchange="setChartSize(this.value,true)"></div>';
+		buff+='<div class="setting">Start year:<input type="range" min="2001" max="2015" step="1" value="'+startyear.toString()+'" onchange="setStartYear(this.value)"></div>';
+	} else {
+		var found=0
+		for(i=0;i<numplayers;i++)
+		{
+			var player=players[i]
+			var ok;
+			if(letter==0){
+				ok=selplayers[i]
+			}else{
+				ok=(player.charAt(0)==letter);
 			}
-			buff+=('<span onmousedown="handlePlayerCheckbox('+i+')"><span id="pch'+i+'">'+checked+'</span>&nbsp;<a href="#">'+
-				player+"</a></span><br>");
+			if(ok){
+				var checked=pchcont(false);
+				found++;
+				if(selplayers[i]){
+					checked=pchcont(true);
+				}
+				buff+=('<span onmousedown="handlePlayerCheckbox('+i+')"><span id="pch'+i+'">'+checked+'</span>&nbsp;<a href="#">'+
+					player+"</a></span><br>");
+			}
+		}
+		if(found==0){
+			buff="no players found"
 		}
 	}
-	if(found==0){
-		buff="no players found"
+	var exiticon='<span class="playerselectexit"><img src="delt.png" onmousedown="clearSelect();"></span>'
+	var psdiv='<div class="playerselectinner">'+exiticon+buff+'</div>'
+	if((letter==0)&&(collectSelectedIndices().length>0)){
+		psdiv='<span onmousedown="clearAllSelections()"><a href="#">Remove all<img src="clear.png"></a></span><br>'+psdiv;
 	}
-	var psdiv='<div class="playerselectinner">'+buff+'</div><div class="playerselectexit"><img src="delt.png" onmousedown="clearSelect();"></div>'
 	$(".playerselect").html(psdiv);
 	var pos=$("#selpb"+letter).position().left;
 	if(pos>600){pos=600;}
 	pos-=40;
+	if(pos<20){pos=15;}
 	$(".playerselect").css("left",pos.toString()+"px")
 	$(".playerselect").slideDown();
 }
@@ -157,7 +205,7 @@ function selectLetter(setletter){
 // build letter menu
 function buildLetterMenu()
 {
-	var buff='&nbsp;Players:&nbsp;<button class="letterbutton" id="selpb0" onClick="selectLetter(0);">Remove</button>';
+	var buff='<button class="letterbutton0" id="selpb1" onClick="selectLetter(1);"><img src="settings.png"></button>&nbsp;<button class="letterbutton" id="selpb0" onClick="selectLetter(0);"><img src="clearsmall.png" style="position: relative; top: -2px;"></button>';
 	for(i="A".charCodeAt(0);i<"Z".charCodeAt(0);i++)
 	{
 		var letter=String.fromCharCode(i);
@@ -180,6 +228,9 @@ $(document).ready(function(){
 
 	buildLetterMenu();
 
+	$(".playerselect").css("left","20px")
+	setChartSize(chartsize.toString(),false);
+
 	$(function() {
   	setTimeout(function() {
     	Shiny.onInputChange('rplayers',1);
@@ -196,20 +247,12 @@ $(document).ready(function(){
 </script>
 
 <div class="parent">
-  <div class="menu">
-	<button id="cbutton" onmousedown="cval=cval+1;Shiny.onInputChange('rplayers',cval);">Control</button>
-  </div>
-  <div class="playerselect">
-  Select players by clicking on their initial letter
-  </div>
-    <div class="content">
-    	<div id="trendPlot" class="plotly html-widget html-widget-output"></div>
-    </div>
-    <!--<div id="dataTable" style="width:100%; height:auto" class="datatables html-widget html-widget-output"></div>
-  	<div id="tablecont"></div>
-	<div id="svgcont"></div>
-  	<div id="plotlycont"></div>-->
-  </div>
+	<div class="menu"></div>
+	<div class="playerselect">Select players by clicking on their initial letter</div>
+	<div class="content">
+		<div id="trendPlot" class="plotly html-widget html-widget-output"></div>
+	</div>
+	<!--<div id="dataTable" style="width:100%; height:auto" class="datatables html-widget html-widget-output"></div>-->
 </div>
 
 </body>
