@@ -1,8 +1,10 @@
 
 library(shiny)
 library(plotly)
+library(DT)
 
 dt<-read.table("ratinghist.txt")
+lists<-sprintf("%04d",dt$date)
 load("players.dat")
 names(players)<-paste("X",as.character(names(players)),sep="")
 fideids<-names(players)
@@ -50,7 +52,23 @@ shinyServer(function(input, output, session){
   }
   
   observeEvent(input$rplayers,{
-    session$sendCustomMessage(type="setPlayers",message=list(fideids,playernames))
+    #print("rplayers")
+    session$sendCustomMessage(type="setPlayers",message=list(fideids,playernames,lists))
+  })
+  
+  observeEvent(input$rlist,{
+    #print("rlist")
+    i<-input$rlist+1
+    date<-dt$date[i]
+    dt2<-dt[,2:length(fideids)]
+    dt2<-dt2[,order(-dt2[i,])]
+    playersordered=players[colnames(dt2)]
+    ranklistnames=as.character(playersordered)
+    ranklistrtgs=as.character(dt2[i,])
+    ranklist<-data.frame(ranklistnames,ranklistrtgs)
+    #print("render")
+    dto<-datatable(ranklist)
+    output$dataTable<- renderDataTable(dto)
   })
   
   observeEvent(input$reqchart,{

@@ -13,6 +13,7 @@
 
 <link href="shared/shiny.css" rel="stylesheet" />
 <link href="shared/bootstrap/css/bootstrap.min.css" rel="stylesheet" />
+<!--<link rel="stylesheet" type="text/css" href="jquery.dataTables.min.css">-->
 
 <script type="application/shiny-singletons"></script>
 <script src="shared/json2-min.js"></script>
@@ -24,11 +25,9 @@
 
 <!-- local shiny includes from the www folder -->
 
-<link rel="stylesheet" type="text/css" href="jquery.dataTables.min.css">
-
 <script src="htmlwidgets.js"></script>
 <script src="datatables.js"></script>
-<script type="text/javascript" charset="utf8" src="jquery.dataTables.min.js"></script>
+<!--<script type="text/javascript" charset="utf8" src="jquery.dataTables.min.js"></script>-->
 <script src="plotly-latest.min.js"></script>
 <script src="plotly.js"></script>
 
@@ -64,14 +63,16 @@ function setPlot(message)
 {
 	Plotly.newPlot(document.getElementById(message[0]),JSON.parse(message[1]),JSON.parse(message[2]));	
 }
-var fideids;
-var players;
-var selplayers;
-var numplayers;
+var fideids=new Array(0);
+var players=new Array(0);
+var selplayers=new Array(0);
+var numplayers=0;
+var lists=new Array(0);
 function setPlayers(message)
 {
 	fideids=message[0]
 	players=message[1];
+	lists=message[2];
 	numplayers=players.length;
 	selplayers=new Array(numplayers);
 	for(var i=0; i<selplayers.length; ++i) { selplayers[i]=false; }
@@ -204,14 +205,58 @@ function selectLetter(setletter){
 	}
 }
 
+var mode=0;
+var modenames=["chart","list"]
+
+function loadList(message){
+	$('#tableOut').html(message[0])
+}
+
+function requestList(i){
+	Shiny.onInputChange('rlist',i);
+}
+
+function buildTcontent(){
+	if(lists.length==0){		
+		return;
+	}
+	var buff="";
+	for(i=0;i<lists.length;i++){
+		buff+='<a class="listelement" href="#" onclick="requestList('+i+');">'+lists[i]+'</a> ';
+	}
+	$('.showlists').html(buff);
+}
+
+function switchMode(){
+	mode=1-mode;
+	buildLetterMenu()
+	if(mode==0){
+		$('.content').show();
+		$('.showlists').hide();
+		$('#dataTable').hide();
+	} else {
+		$('.content').hide();
+		$('.playerselect').hide();
+		buildTcontent();
+		$('#dataTable').show();
+		$('.showlists').show();
+	}
+}
+
 // build letter menu
 function buildLetterMenu()
 {
-	var buff='<button class="letterbutton0" id="selpb1" onClick="selectLetter(1);"><img src="settings.png"></button>&nbsp;<button class="letterbutton" id="selpb0" onClick="selectLetter(0);"><img src="clearsmall.png" style="position: relative; top: -2px;"></button>';
-	for(i="A".charCodeAt(0);i<"Z".charCodeAt(0);i++)
-	{
-		var letter=String.fromCharCode(i);
-		buff+=('<button class="letterbutton" id="selpb'+letter+'" onclick="selectLetter('+"'"+letter+"'"+');">'+letter+'</button>');
+	var modebutton='<button class="letterbutton" id="selpb2" onClick="switchMode();"><img src="'+modenames[1-mode]+'.png" style="position: relative; top: -2px;"></button>';
+	var addbuttons=[modebutton+'<button class="letterbutton0" id="selpb1" onClick="selectLetter(1);"><img src="settings.png"></button>'+'<button class="letterbutton" id="selpb0" onClick="selectLetter(0);"><img src="clearsmall.png" style="position: relative; top: -2px;"></button>',modebutton]
+
+	var buff=addbuttons[mode];
+	
+	if(mode==0){
+		for(i="A".charCodeAt(0);i<"Z".charCodeAt(0);i++)
+		{
+			var letter=String.fromCharCode(i);
+			buff+=('<button class="letterbutton" id="selpb'+letter+'" onclick="selectLetter('+"'"+letter+"'"+');">'+letter+'</button>');
+		}
 	}
 	$('.menu').html(buff);
 }
@@ -223,6 +268,7 @@ $(document).ready(function(){
 	Shiny.addCustomMessageHandler("setPlot",setPlot);
 	Shiny.addCustomMessageHandler("setInnerHTML",setInnerHTML);
 	Shiny.addCustomMessageHandler("setPlayers",setPlayers);
+	Shiny.addCustomMessageHandler("loadList",loadList);
 	// end bind handlers
 
 	d3.select("body").style("background-color", "#ffffff");
@@ -230,12 +276,13 @@ $(document).ready(function(){
 
 	buildLetterMenu();
 
+	$(".showlists").hide();
 	$(".playerselect").css("left","20px")
 	setChartSize(chartsize.toString(),false);
 
 	$(function() {
   	setTimeout(function() {
-    	Shiny.onInputChange('rplayers',1);
+  		cval=cval+1;Shiny.onInputChange('rplayers',cval);
     	Shiny.onInputChange('control',["X1503014","X2016192"]);
   	}, 1000)
 });
@@ -251,10 +298,13 @@ $(document).ready(function(){
 <div class="parent">
 	<div class="menu"></div>
 	<div class="playerselect">Select players by clicking on their initial letter</div>
-	<div class="content">
-		<div id="trendPlot" class="plotly html-widget html-widget-output"></div>
+	<div style="position: absolute;">
+		<div class="content">
+			<div id="trendPlot" class="plotly html-widget html-widget-output"></div>
+		</div>
+		<div class="showlists"></div>
+		<div id="dataTable" style="width:100%; height:auto" class="datatables html-widget html-widget-output"></div>		
 	</div>
-	<!--<div id="dataTable" style="width:100%; height:auto" class="datatables html-widget html-widget-output"></div>-->
 </div>
 
 </body>
