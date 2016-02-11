@@ -64,12 +64,14 @@ function setPlot(message)
 {
 	Plotly.newPlot(document.getElementById(message[0]),JSON.parse(message[1]),JSON.parse(message[2]));	
 }
+var fideids;
 var players;
 var selplayers;
 var numplayers;
 function setPlayers(message)
 {
-	players=message;
+	fideids=message[0]
+	players=message[1];
 	numplayers=players.length;
 	selplayers=new Array(numplayers);
 	for(var i=0; i<selplayers.length; ++i) { selplayers[i]=false; }
@@ -89,7 +91,7 @@ function collectSelectedIndices(){
 	var selpis=new Array(0);
 	for(j=0;j<numplayers;j++) {
 		if(selplayers[j]) {
-			selpis.push(players[j]);
+			selpis.push(fideids[j]);
 		}
 	}
 	return(selpis);
@@ -234,7 +236,7 @@ $(document).ready(function(){
 	$(function() {
   	setTimeout(function() {
     	Shiny.onInputChange('rplayers',1);
-    	Shiny.onInputChange('control',["Carlsen..Magnus","Nakamura..Hikaru"]);
+    	Shiny.onInputChange('control',["X1503014","X2016192"]);
   	}, 1000)
 });
 

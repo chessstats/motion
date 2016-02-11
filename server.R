@@ -2,8 +2,12 @@
 library(shiny)
 library(plotly)
 
-dt<-read.table("dt.txt")
-players<-colnames(dt[2:(length(dt[1,])-2)])
+dt<-read.table("ratinghist.txt")
+load("players.dat")
+names(players)<-paste("X",as.character(names(players)),sep="")
+fideids<-names(players)
+playernames<-as.character(players)
+#cat("ids",fideids[1:5],"names",playernames[1:5])
 dt$year=2000+dt$year/100
 
 chartsize<<-800
@@ -14,9 +18,9 @@ shinyServer(function(input, output, session){
   drawchart<- function(){
     output$trendPlot <- renderPlotly({
       
-      selp=input$control
+      selp<-input$control
       if(length(selp)==0) {
-        selp=c("Carlsen..Magnus","Nakamura..Hikaru")
+        selp=c("X1503014","X2016192")
       }
       
       starti<-1
@@ -29,24 +33,24 @@ shinyServer(function(input, output, session){
       
       dteff<-dt[starti:nrow(dt),]
       
-      command<-paste("p<-plot_ly(dteff,type='scatter',x=year,y=",selp[1],",name='",selp[1],"')",sep="")
+      command<-paste("p<-plot_ly(dteff,type='line',x=year,y=",selp[1],",name='",players[[selp[1]]],"')",sep="")
       #print(command)
       eval(parse(text=command))
       
       if(length(selp)>1) for(j in 2:length(selp)) {
-        command=paste("p<-add_trace(p,type='scatter',x=year,y=",selp[j],",name='",selp[j],"')",sep="")
+        command=paste("p<-add_trace(p,type='line',x=year,y=",selp[j],",name='",players[[selp[j]]],"')",sep="")
         #print(command)
         eval(parse(text=command))
       }
       
-      p<-layout(p,height=round(chartsize/1.5),width=chartsize)
+      p<-layout(p,height=round(chartsize/1.5),width=chartsize,xaxis=list(title=''),yaxis=list(title=''),margins=list(pad=10))
       
       p
     })
   }
   
   observeEvent(input$rplayers,{
-    session$sendCustomMessage(type="setPlayers",message=players)
+    session$sendCustomMessage(type="setPlayers",message=list(fideids,playernames))
   })
   
   observeEvent(input$reqchart,{
