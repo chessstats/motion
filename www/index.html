@@ -213,6 +213,9 @@ function loadList(message){
 }
 
 function requestList(i){
+	for(j=0;j<lists.length;j++){
+		d3.select('#le'+j.toString()).style("background-color", j==i?"#ffffaf":"#dfdfdf");
+	}
 	Shiny.onInputChange('rlist',i);
 }
 
@@ -222,7 +225,7 @@ function buildTcontent(){
 	}
 	var buff="";
 	for(i=0;i<lists.length;i++){
-		buff+='<a class="listelement" href="#" onclick="requestList('+i+');">'+lists[i]+'</a> ';
+		buff+='<span class="listelement" id="le'+i+'"><a href="#" onclick="requestList('+i+');">'+lists[i]+'</a></span> ';
 	}
 	$('.showlists').html(buff);
 }

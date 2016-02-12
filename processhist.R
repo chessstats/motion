@@ -23,8 +23,12 @@ pparse <- function() {
 		p<-p[complete.cases(p$rtg),]
 		p<-p[complete.cases(p$name),]
 		p<-p[complete.cases(p$fideid),]
+
+		p<-p[!grepl("i",p$flag),]
 		
 		p<-p[order(-p$rtg),]
+
+		print(p[1:3,1:3])
 
 		for(j in 1:100) {
 			name=as.character(p[j,"name"])

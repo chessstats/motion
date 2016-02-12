@@ -29,6 +29,9 @@
 
 			p<-read.table(path)
 
+			flags <- !grepl("i",p$flag)
+			names(flags)<-as.character(p[,"fideid"])
+
 			rtgs<-p[,"rtg"]
 			names(rtgs)<-as.character(p[,"fideid"])
 
@@ -39,7 +42,9 @@
 				#cat("looking up",name,"\n")
 				if(fideid %in% names(rtgs)){
 					#cat(players[j],"=",rtg,"\n")
-					mat[i,j+1]=rtgs[[fideid]]
+					if(flags[[fideid]]){
+						mat[i,j+1]=rtgs[[fideid]]
+					}
 				}
 			}
 
