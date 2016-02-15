@@ -214,7 +214,8 @@ function loadList(message){
 
 function requestList(i){
 	for(j=0;j<lists.length;j++){
-		d3.select('#le'+j.toString()).style("background-color", j==i?"#ffffaf":"#dfdfdf");
+		//d3.select('#le'+j.toString()).style("background-color", j==i?"#ffffaf":"#dfdfdf");
+		$('#le'+j.toString()).css("background-color", j==i?"#ffffaf":"#dfdfdf");
 	}
 	Shiny.onInputChange('rlist',i);
 }
