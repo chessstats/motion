@@ -12,6 +12,9 @@
 
 		mat<-matrix(,nrow=200,20)
 
+		minage=20
+		maxage=40
+
 		for(file in list.files(path=root,pattern="\\.txt$")) {
 			m<-str_match(file,"^(....)")
 			d<-m[1,2]
@@ -24,6 +27,8 @@
 			p<-read.table(path)
 
 			p<-p[complete.cases(p$born),]
+			p<-p[grep("i",p$flag,invert=TRUE),]
+
 			pw<-p[grep("w",p$flag),]
 			pm<-p[grep("w",p$flag,invert=TRUE),]
 
@@ -31,20 +36,20 @@
 			bornw<-pw[,"born"]
 			bornm<-pm[,"born"]
 
-			numb<-length(born)
-			numbw<-length(bornw)
-			numbm<-length(bornm)
-
-			if((numb>100)&(numbw>0)) {
+			if((length(born)>100)&(length(bornw)>0)) {
 
 				age<-2016-born
-				age<-age[(age>10)&(age<100)]
+				age<-age[(age>=minage)&(age<=maxage)]
 
 				agew<-2016-bornw
-				agew<-agew[(agew>10)&(agew<100)]
+				agew<-agew[(agew>=minage)&(agew<=maxage)]
 
 				agem<-2016-bornm
-				agem<-agem[(agem>10)&(agem<100)]
+				agem<-agem[(agem>=minage)&(agem<=maxage)]
+
+				numb<-length(age)
+				numbw<-length(agew)
+				numbm<-length(agem)
 
 				minb<-min(age)
 				maxb<-max(age)
