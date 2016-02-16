@@ -24,27 +24,51 @@
 			p<-read.table(path)
 
 			p<-p[complete.cases(p$born),]
+			pw<-p[grep("w",p$flag),]
+			pm<-p[grep("w",p$flag,invert=TRUE),]
 
 			born<-p[,"born"]
+			bornw<-pw[,"born"]
+			bornm<-pm[,"born"]
 
 			numb<-length(born)
+			numbw<-length(bornw)
+			numbm<-length(bornm)
 
-			if(numb>100) {
+			if((numb>100)&(numbw>0)) {
 
 				age<-2016-born
 				age<-age[(age>10)&(age<100)]
+
+				agew<-2016-bornw
+				agew<-agew[(agew>10)&(agew<100)]
+
+				agem<-2016-bornm
+				agem<-agem[(agem>10)&(agem<100)]
 
 				minb<-min(age)
 				maxb<-max(age)
 				avga<-mean(age)
 
-				cat("numb",numb,"mina",minb,"maxa",maxb,"avga",avga,"\n")
+				minbw<-min(agew)
+				maxbw<-max(agew)
+				avgaw<-mean(agew)
+
+				minbm<-min(agem)
+				maxbm<-max(agem)
+				avgam<-mean(agem)
+
+				parf<-numbw/numb
+
+				cat("parf",parf,"numb",numb,"mina",minb,"maxa",maxb,"avga",avga,"numbw",numbw,"minaw",minbw,"maxaw",maxbw,"avgaw",avgaw,"numbm",numbm,"minam",minbm,"maxam",maxbm,"avgam",avgam,"\n")
 
 				pngname=paste("pngs/a",d,".png",sep="")
 
 				png(pngname)
 
-				plot(density(age),main=paste("Date 20",substr(d,1,2),".",substr(d,3,4),sep=""),xlim=c(10,80))
+				plot(density(age),main=paste("Date 20",substr(d,1,2),".",substr(d,3,4),sep=""),xlim=c(10,80),ylim=c(0,0.05),lty=2)
+				lines(density(agew),col="red",lwd=3)
+				lines(density(agem),col="blue",lwd=3)
 
 				graphics.off()
 
