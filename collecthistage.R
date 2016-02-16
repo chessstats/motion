@@ -10,7 +10,7 @@
 		require(stringr)
 		i<<-1
 
-		mat<-matrix(,nrow=200,20)
+		mat<-matrix(,nrow=200,5)
 
 		minage=20
 		maxage=40
@@ -48,8 +48,11 @@
 				agem<-agem[(agem>=minage)&(agem<=maxage)]
 
 				numb<-length(age)
+				mat[i,2]=numb
 				numbw<-length(agew)
+				mat[i,4]=numbw
 				numbm<-length(agem)
+				mat[i,3]=numbm
 
 				minb<-min(age)
 				maxb<-max(age)
@@ -64,6 +67,7 @@
 				avgam<-mean(agem)
 
 				parf<-numbw/numb
+				mat[i,5]=parf
 
 				cat("parf",parf,"numb",numb,"mina",minb,"maxa",maxb,"avga",avga,"numbw",numbw,"minaw",minbw,"maxaw",maxbw,"avgaw",avgaw,"numbm",numbm,"minam",minbm,"maxam",maxbm,"avgam",avgam,"\n")
 
@@ -77,22 +81,26 @@
 
 				graphics.off()
 
+				i<<-i+1
+
 			}
 
-			i<<-i+1
 			if(i>100){
 				break
 			}
 		}
 
 		dt<-as.data.frame(mat[1:i,])
-		colnames(dt)<-c("date")
+		colnames(dt)<-c("date","num","numm","numf","parf")
 		dt<-dt[complete.cases(dt$date),]
 
 		dt[["date2"]]=gsub("^0","",dt$date)
 		dt[["year"]]=round(strtoi(dt$date2)/100)*100+(strtoi(dt$date2)-round(strtoi(dt$date2)/100)*100)*(100/12)
+		dt[["date2"]]<-NULL
 
 		dt<-dt[order(dt$year),]
+
+		dt[["year"]]<-NULL
 
 		write.table(dt,"gdhist.txt")
 		cat("done","\n")
